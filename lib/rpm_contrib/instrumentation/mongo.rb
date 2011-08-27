@@ -16,7 +16,7 @@ DependencyDetection.defer do
           name, collection = f if f
         end
 
-        trace_execution_scoped("Database/#{collection}/#{name}") do
+        trace_execution_scoped(["Database/#{collection}/#{name}", "ActiveRecord/all"]) do
           t0 = Time.now
           res = instrument_without_newrelic_trace(name, payload, &blk)
           NewRelic::Agent.instance.transaction_sampler.notice_sql(payload.inspect, nil, (Time.now - t0).to_f)
@@ -34,7 +34,7 @@ DependencyDetection.defer do
       def refresh_with_newrelic_trace
         return if send_initial_query || @cursor_id.zero? # don't double report the initial query
 
-        trace_execution_scoped("Database/#{collection.name}/refresh") do
+        trace_execution_scoped(["Database/#{collection.name}/refresh", "ActiveRecord/all"]) do
           refresh_without_newrelic_trace
         end
       end
